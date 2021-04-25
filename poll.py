@@ -74,8 +74,7 @@ def send_notification(custom_json):
     id = 'hive-hydra'
 
     try:
-        # This is the posting key for 'learn-to-code' but we will post on
-        # behalf of 'podcastindex': this permission can be revoked.
+        # This is the posting key for 'learn-to-code' 
         server_account = os.getenv('HIVE_SERVER_ACCOUNT')
         wif = os.getenv('HIVE_POSTING_KEY')
         h = Hive(keys=wif, node='https://api.deathwing.me', rpcuser=server_account)
