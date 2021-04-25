@@ -5,12 +5,36 @@ import os
 from datetime import datetime
 
 from beem import Hive
+from six import text_type
+
+all_checks = {}
+
+def get_feed_hash(url):
+    """ Returns hash of a feed and timestamp """
+    fetched = requests.get(url)
+    m= hashlib.sha256()
+    m.update(fetched.text.encode())
+    text_hash = m.hexdigest()
+    ts = int(datetime.utcnow().timestamp())
+    return text_hash, ts
+
+def update_all_checks(feed, text_hash, ts):
+    """ Takes in a feed and a hash, timestamp and updates disk file """
+    global all_checks
+    url = feed['url']
+    all_checks[url] = {
+        "title": feed['title'],
+        "hash" : text_hash,
+        "timestamp" : ts
+    }
+    with open('all_hash.json', 'w') as f:
+        json.dump(all_checks, f, indent=2)
 
 
 def get_feeds():
     """ Read in a json with a list of feeds and start polling them """
 
-    all_checks = {}
+    global all_checks
     # This is the account name of polling agent 'learn-to-code'
     server_account = os.getenv('HIVE_SERVER_ACCOUNT')
 
@@ -22,12 +46,7 @@ def get_feeds():
 
     for feed in ans['feeds'][0:10]:
         url = feed['url']
-
-        fetched = requests.get(url)
-        m= hashlib.sha256()
-        m.update(fetched.text.encode())
-        text_hash = m.hexdigest()
-        ts = int(datetime.utcnow().timestamp())
+        text_hash, ts = get_feed_hash(url)
 
         if all_checks.get(url):
             if text_hash != all_checks[url].get('hash'):
@@ -40,13 +59,12 @@ def get_feeds():
                 }
                 trx_id = send_notification(custom_json)
                 if trx_id != 'failure':
-                    all_checks[url] = {
-                        "title": feed['title'],
-                        "hash" : text_hash,
-                        "timestamp" : ts
-                    }
-                    with open('all_hash.json', 'w') as f:
-                        json.dump(all_checks, f, indent=2)
+                    update_all_checks(feed,text_hash,ts)
+
+        else:
+            # New feed
+            update_all_checks(feed,text_hash,ts)
+
 
         print(f'fetched {url} - {ts}')
 
@@ -59,7 +77,7 @@ def send_notification(custom_json):
         # This is the posting key for 'learn-to-code' but we will post on
         # behalf of 'podcastindex': this permission can be revoked.
         wif = os.getenv('HIVE_POSTING_KEY')
-        h = Hive(keys=wif)
+        h = Hive(keys=wif, node='https://api.deathwing.me')
         tx = h.custom_json(id=id, json_data= custom_json ,
                         required_posting_auths=['podcastindex'])
         trx_id = tx['trx_id']
