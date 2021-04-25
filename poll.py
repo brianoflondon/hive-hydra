@@ -73,19 +73,20 @@ def send_notification(custom_json):
     """ Sends a custom_json to Hive """
     id = 'hive-hydra'
 
-    try:
-        # This is the posting key for 'learn-to-code' 
-        server_account = os.getenv('HIVE_SERVER_ACCOUNT')
-        wif = os.getenv('HIVE_POSTING_KEY')
-        h = Hive(keys=wif, node='https://api.deathwing.me', rpcuser=server_account)
-        tx = h.custom_json(id=id, json_data= custom_json,
-                           required_posting_auths=[server_account])
-        trx_id = tx['trx_id']
-        print(f'Json saved in https://hive.ausbit.dev/tx/{trx_id}')
+    # This is the posting key for 'learn-to-code'
+    server_account = os.getenv('HIVE_SERVER_ACCOUNT')
+    wif = [os.getenv('HIVE_POSTING_KEY')]
+    h = Hive(keys=wif)
 
-    except Exception as ex:
-        print(f'{ex.__class__} occurred')
-        trx_id = "failure"
+    tx = h.custom_json(id=id, json_data= custom_json,
+                        required_posting_auths=[server_account])
+    trx_id = tx['trx_id']
+    print(f'Json saved in https://hive.ausbit.dev/tx/{trx_id}')
+
+    # except Exception as ex:
+    #     print(f'{ex.__class__} occurred')
+
+    #     trx_id = "failure"
 
     return trx_id
 
