@@ -76,10 +76,11 @@ def send_notification(custom_json):
     try:
         # This is the posting key for 'learn-to-code' but we will post on
         # behalf of 'podcastindex': this permission can be revoked.
+        server_account = os.getenv('HIVE_SERVER_ACCOUNT')
         wif = os.getenv('HIVE_POSTING_KEY')
-        h = Hive(keys=wif, node='https://api.deathwing.me')
-        tx = h.custom_json(id=id, json_data= custom_json ,
-                        required_posting_auths=['podcastindex'])
+        h = Hive(keys=wif, node='https://api.deathwing.me', rpcuser=server_account)
+        tx = h.custom_json(id=id, json_data= custom_json,
+                           required_posting_auths=[server_account, 'podcastindex'])
         trx_id = tx['trx_id']
         print(f'Json saved in https://hive.ausbit.dev/tx/{trx_id}')
 
