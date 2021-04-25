@@ -80,7 +80,7 @@ def send_notification(custom_json):
         wif = os.getenv('HIVE_POSTING_KEY')
         h = Hive(keys=wif, node='https://api.deathwing.me', rpcuser=server_account)
         tx = h.custom_json(id=id, json_data= custom_json,
-                           required_posting_auths=[server_account, 'podcastindex'])
+                           required_posting_auths=[server_account])
         trx_id = tx['trx_id']
         print(f'Json saved in https://hive.ausbit.dev/tx/{trx_id}')
 
