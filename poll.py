@@ -44,7 +44,7 @@ def get_feeds():
     with open('all_hash.json', 'r') as f:
         all_checks = json.load(f)
 
-    for feed in ans['feeds'][0:10]:
+    for feed in ans['feeds']:
         url = feed['url']
         text_hash, ts = get_feed_hash(url)
 
