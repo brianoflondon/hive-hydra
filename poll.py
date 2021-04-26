@@ -1,11 +1,13 @@
+
 import requests
 import json
 import hashlib
 import os
 from datetime import datetime
 
+
 from beem import Hive
-from six import text_type
+
 
 all_checks = {}
 

@@ -42,8 +42,15 @@ def main():
         count += 1
         if (count % 1000 == 0):
             t = datetime.utcnow() - start
-            print (f'Count: {count} - {t}')
-            print(json.dumps(Counter(ids_custom_json),indent=2))
+            # print (f'Count: {count} - {t}')
+            # print(json.dumps(Counter(ids_custom_json),indent=2))
+            output = {
+                "transTotal": count,
+                "timeElapsed": f'{t}',
+                "rate": count / t.seconds,
+                "transactionCounts": Counter(ids_custom_json)
+            }
+            print(json.dumps(output, indent=2))
 
         if post['id'] == 'hive-hydra':
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
