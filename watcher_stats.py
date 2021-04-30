@@ -48,9 +48,13 @@ def main():
                 "transTotal": count,
                 "timeElapsed": f'{t}',
                 "rate": count / t.seconds,
+                "block_num" : post['block_num'],
                 "transactionCounts": Counter(ids_custom_json)
             }
-            print(json.dumps(output, indent=2))
+            # print(json.dumps(output, indent=2))
+            print(count, post['block_num'])
+            with open('stats_summary.json', 'w') as f:
+                json.dump(output, f, indent=2)
 
         if post['id'] == 'hive-hydra':
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):

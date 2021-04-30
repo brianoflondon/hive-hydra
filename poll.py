@@ -4,7 +4,7 @@ import json
 import hashlib
 import os
 from datetime import datetime
-
+import xmltodict
 
 from beem import Hive
 
