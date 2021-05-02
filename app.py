@@ -1,5 +1,6 @@
 from flask import Flask, request
 from beem import Hive
+
 import os
 
 app = Flask(__name__)
@@ -26,23 +27,6 @@ def send_notification(custom_json, server_account='', wif=''):
         trx_id = 'failure'
 
     return trx_id
-
-
-def get_allowed_accounts(acc_name):
-    """ get a list of all accounts allowed to post by acc_name (podcastindex)
-        and only react to these accounts """
-
-    hiveaccount = Account(acc_name, lazy=True)
-    try:
-        allowed = hiveaccount['posting']['account_auths']
-        allowed = [x for (x,_) in allowed]
-
-    except Exception as ex:
-        allowed = []
-
-    return allowed
-
-
 
 @app.route("/")
 def home():
