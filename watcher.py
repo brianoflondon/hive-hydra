@@ -65,7 +65,7 @@ def scan_history(timed):
                                raw_ops=False, threading=False)
     for post in stream:
         time_dif = post['timestamp'].replace(tzinfo=None) - start_time
-        if time_dif > timedelta(minutes=1):
+        if time_dif > timedelta(minutes=15):
             print(post['timestamp'])
             start_time =post['timestamp'].replace(tzinfo=None)
         if post['id'] == 'hive-hydra':
@@ -75,6 +75,7 @@ def scan_history(timed):
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes= 240)
+    timed = timedelta(minutes=60)
+    # timed = timedelta(days= 2)
     scan_history(timed)
     main()
