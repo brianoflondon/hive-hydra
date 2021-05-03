@@ -54,6 +54,7 @@ def get_feeds():
             if text_hash != all_checks[url].get('hash'):
                 custom_json = {
                     "id" : feed['id'],
+                    "title" : feed['title'],
                     "url": url,
                     "timestamp": ts,
                     "hash":text_hash,
