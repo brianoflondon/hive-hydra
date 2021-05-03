@@ -6,6 +6,10 @@ from time import sleep
 import json
 import logging
 
+import telegram
+import os
+t_key = os.getenv('TELEGRAM_BOT_KEY')
+
 logging.basicConfig(level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
@@ -27,11 +31,23 @@ def get_allowed_accounts(acc_name) -> bool:
 
 def output(post) -> None:
     """ Prints out the post and extracts the custom_json """
+    bot = telegram.Bot(token=t_key)
     data = json.loads(post.get('json'))
     print(json.dumps(post, indent=2, default=str))
     print('--------------------------------')
     print(json.dumps(data,indent=2,default=str))
     print('****************************************')
+    title = data.get('title')
+    url = data.get('url')
+    if not title:
+        title = "No Title"
+        url = "No URL"
+        t_message = json.dumps(data,indent=2,default=str)
+    else:
+        t_message = f"{title} updated ({url})"
+
+
+    bot.send_message(chat_id="-1001375564114",text=t_message)
 
 
 def main():
@@ -81,5 +97,5 @@ def scan_history(timed):
 if __name__ == "__main__":
     timed = timedelta(minutes=60)
     # timed = timedelta(days= 2)
-    # scan_history(timed)
+    scan_history(timed)
     main()

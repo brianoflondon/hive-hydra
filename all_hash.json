@@ -16,8 +16,8 @@
   },
   "https://feeds.podiant.co/karamasutra/rss.xml": {
     "title": "Kar\u0101maS\u016btra",
-    "hash": "f32b56d63ad2f8dfd41f187208beef09148eb4737380d9c99176d45ad1078206",
-    "timestamp": 1619934694
+    "hash": "99428d7d19dab7e2e76eeaf67a82fa4aaf6f66a536aad7128c93d7bb8e25b3b8",
+    "timestamp": 1620011060
   },
   "https://feeds.fireside.fm/truecrimeandconsequences/rss": {
     "title": "True Crime & Consequences",
@@ -26,8 +26,8 @@
   },
   "https://feeds.buzzsprout.com/966943.rss": {
     "title": "Civil Engineering Vibes",
-    "hash": "0d290d5d32bcb477fc834ea411f08f3e50a4e3e6b9168a520e2a6a0743d3f4dd",
-    "timestamp": 1619934697
+    "hash": "9c4e72f516ccc3b68e459acc8af6a93c9dd1a32d6fd1e0b4dd179ce53394de06",
+    "timestamp": 1620011068
   },
   "https://lifespringmedia.com/category/how-to-pronounce-bible-names/feed/": {
     "title": "How To Pronounce Bible Names | Lifespring! Media",
@@ -36,8 +36,8 @@
   },
   "http://feed.nashownotes.com/rss.xml": {
     "title": "No Agenda",
-    "hash": "51efa99a40cff1db90ab7ab82038a282a457949801bd6ec0b56a494284cfbfd3",
-    "timestamp": 1619874187
+    "hash": "ce2bb4f70dbbfbb30a1f8efc9a3647d69aaa5328248d6f97418a30700abc2884",
+    "timestamp": 1620011071
   },
   "http://feeds.feedburner.com/gamefuel": {
     "title": "GameFuel Presented by KNGI Network",
@@ -46,13 +46,13 @@
   },
   "https://pinecast.com/feed/wheeloftopics": {
     "title": "Wheel Of Topics",
-    "hash": "b81e36bc47b62119dfd5152ab9ca9a09a10b350a616c883d2fa822d770b5ae90",
-    "timestamp": 1619934702
+    "hash": "91dcac83a7404ca51d44a8734d927197a57bb756d20413f8bdded3e97b053e14",
+    "timestamp": 1620011074
   },
   "https://bitcoinundco.com/en/feed/mp3/": {
     "title": "The Anita Posch Show: A Bitcoin Podcast",
-    "hash": "a2fbcd0f99da65c5a9af58e122c0a4862c8449061e190bc47be7acf51d8e4f33",
-    "timestamp": 1619874193
+    "hash": "b80086519b040d5c67730f69fd25b0e230284a04c3e70bdfff9c36a943aa9608",
+    "timestamp": 1620011078
   },
   "https://brianoflondon.me/feed/podcast/brians-forest-talks": {
     "title": "BrianofLondon's Forest Talks",
@@ -86,13 +86,13 @@
   },
   "http://www.c3d2.de/pentaradio.xml": {
     "title": "Pentaradio",
-    "hash": "d10767e63b134e36613a746babcd5f9542dbbf121b15ea6184d2152e479c88c5",
-    "timestamp": 1619934710
+    "hash": "bd2b6b5f0fdf2544057d1fd5ad00afeee27bbd60d399728fb0aefe51a7bf8ca2",
+    "timestamp": 1620011086
   },
   "https://engineered.network/pragmatic/feed/index.xml": {
     "title": "Pragmatic",
-    "hash": "1b195e4cd4f0bdc13581d58580680ab835a73ad6d73ef6df238a57110489d9de",
-    "timestamp": 1619934712
+    "hash": "957ca35017a74c3c08f92a3776021a9bc8320e8dc82a735dd9e47d0e0b200c00",
+    "timestamp": 1620011088
   },
   "https://bloodybeaver.libsyn.com/rss": {
     "title": "Bloody Beaver Podcast",
@@ -101,8 +101,8 @@
   },
   "https://castleisland.libsyn.com/rss": {
     "title": "On The Brink with Castle Island",
-    "hash": "87f8239b0118a74549ca2eaeca923e37436e1cd007e85e58cd654e365255bf20",
-    "timestamp": 1619874210
+    "hash": "221b9a20827bfb645e71ca8ecb6c5b24cedef1488e2c1ad7ce6155499defc7f5",
+    "timestamp": 1620011091
   },
   "https://einundzwanzig.space/feed.xml": {
     "title": "Einundzwanzig, der Bitcoin Podcast",
@@ -126,8 +126,8 @@
   },
   "https://podnews.net/rss": {
     "title": "Podnews podcasting news",
-    "hash": "826bedf2dae04fd664434598db68fba392df57fb93dcb896a30b91511091d6cd",
-    "timestamp": 1619874225
+    "hash": "f9dcb20828beb389f5a1bcb746b69ddbcd3a7af4e700f42feccd7395a8d6aff6",
+    "timestamp": 1620011098
   },
   "https://anchor.fm/s/441273e0/podcast/rss": {
     "title": "Satoshi Radio",
