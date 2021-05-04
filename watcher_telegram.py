@@ -68,7 +68,8 @@ def main():
         h = Hive()
 
     blockchain = Blockchain(mode="head")
-    logging.info('Watching live...')
+    current_block_num = blockchain.get_current_block_num()
+    logging.info('Watching live from block_num: ' + str(current_block_num))
 
     stream = blockchain.stream(opNames=['custom_json'], raw_ops=False, threading=False, thread_num=4)
 
@@ -79,7 +80,8 @@ def main():
         count_posts +=1
         time_dif = post['timestamp'].replace(tzinfo=None) - start_time
         if time_dif > timedelta(minutes=1):
-            logging.info(str(post['timestamp']) + " Count: " + str(count_posts))
+            current_block_num = blockchain.get_current_block_num()
+            logging.info(str(post['timestamp']) + " Count: " + str(count_posts) + " block_num: " + str(current_block_num))
             start_time =post['timestamp'].replace(tzinfo=None)
             count_posts = 0
 
@@ -115,18 +117,22 @@ def scan_history(timed):
             logging.info(str(post['timestamp']) + " Count: " + str(count_posts) + " Time Delta: " + str(time_to_now))
             start_time =post['timestamp'].replace(tzinfo=None)
             count_posts = 0
-            if time_to_now < timedelta(minutes=5):
-                # Break out of the for loop we've caught up.
-                break
 
         if post['id'] == 'hive-hydra':
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
                 output(post)
-    logging.info('Finished catching up')
+
+        if time_to_now < timedelta(seconds=2):
+            logging.info('block_num: ' + str(post['block_num']))
+            # Break out of the for loop we've caught up.
+            break
+
+
+    logging.info('Finished catching up at block_num: ' + str(post['block_num']))
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes=10)
+    timed = timedelta(minutes=6)
     # timed = timedelta(days= 2)
     scan_history(timed)
     main()
