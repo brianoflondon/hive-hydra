@@ -66,6 +66,9 @@ def main():
     current_block_num = blockchain.get_current_block_num()
     logging.info('Watching live from block_num: ' + str(current_block_num))
 
+    # If you want instant confirmation, you need to instantiate
+    # class:beem.blockchain.Blockchain with mode="head",
+    # otherwise, the call will wait until confirmed in an irreversible block.
     stream = blockchain.stream(opNames=['custom_json'], raw_ops=False, threading=False, thread_num=4)
 
     start_time = datetime.utcnow()
