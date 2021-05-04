@@ -132,7 +132,7 @@ def scan_history(timed):
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes=6)
+    timed = timedelta(minutes=60)
     # timed = timedelta(days= 2)
     scan_history(timed)
     main()
