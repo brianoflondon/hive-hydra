@@ -6,6 +6,11 @@ from time import sleep
 import json
 import logging
 
+
+# Testnet instead of main Hive
+USE_TEST_NODE = True
+TEST_NODE = ['http://testnet.openhive.network:8091']
+
 logging.basicConfig(level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
@@ -38,7 +43,11 @@ def main():
     """ watches the stream from the Hive blockchain """
     allowed_accounts = get_allowed_accounts('podcastindex')
 
-    h = Hive(node='https://api.deathwing.me')
+    if USE_TEST_NODE:
+        h = Hive(node=TEST_NODE)
+    else:
+        h = Hive()
+
     blockchain = Blockchain(mode="head")
     print('Watching...')
     start_time = datetime.utcnow()

@@ -8,6 +8,11 @@ import logging
 
 import telegram
 import os
+
+# Testnet instead of main Hive
+USE_TEST_NODE = True
+TEST_NODE = ['http://testnet.openhive.network:8091']
+
 t_key = os.getenv('TELEGRAM_BOT_KEY')
 
 logging.basicConfig(level=logging.INFO,
@@ -54,7 +59,11 @@ def main():
     """ watches the stream from the Hive blockchain """
     allowed_accounts = get_allowed_accounts('podcastindex')
 
-    h = Hive(node='https://api.deathwing.me')
+    if USE_TEST_NODE:
+        h = Hive(node=TEST_NODE)
+    else:
+        h = Hive()
+
     blockchain = Blockchain(mode="head")
     print('Watching...')
     start_time = datetime.utcnow()
