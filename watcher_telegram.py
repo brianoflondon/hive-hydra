@@ -17,7 +17,10 @@ t_key = os.getenv('TELEGRAM_BOT_KEY')
 
 logging.basicConfig(level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
-
+if USE_TEST_NODE:
+    logging.info('---------------> Using Test Node ' + TEST_NODE[0])
+else:
+    logging.info('---------------> Using Main Hive Chain ')
 
 def get_allowed_accounts(acc_name) -> bool:
     """ get a list of all accounts allowed to post by acc_name (podcastindex)
@@ -65,16 +68,20 @@ def main():
         h = Hive()
 
     blockchain = Blockchain(mode="head")
-    print('Watching...')
-    start_time = datetime.utcnow()
+    logging.info('Watching live...')
 
-    stream = blockchain.stream(opNames=['custom_json'], raw_ops=False, threading=True, thread_num=4)
+    stream = blockchain.stream(opNames=['custom_json'], raw_ops=False, threading=False, thread_num=4)
+
+    start_time = datetime.utcnow()
+    count_posts = 0
 
     for post in stream:
+        count_posts +=1
         time_dif = post['timestamp'].replace(tzinfo=None) - start_time
         if time_dif > timedelta(minutes=1):
-            logging.info(post['timestamp'])
+            logging.info(str(post['timestamp']) + " Count: " + str(count_posts))
             start_time =post['timestamp'].replace(tzinfo=None)
+            count_posts = 0
 
         if post['id'] == 'hive-hydra':
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
@@ -84,27 +91,42 @@ def main():
 
 def scan_history(timed):
     allowed_accounts = get_allowed_accounts('podcastindex')
-    h = Hive()
+
+    if USE_TEST_NODE:
+        h = Hive(node=TEST_NODE)
+    else:
+        h = Hive()
+
     blockchain = Blockchain(mode="head")
     start_time = datetime.utcnow() - timed
+    count_posts = 0
     block_num = blockchain.get_estimated_block_num(start_time)
 
+    logging.info('Started catching up')
     stream = blockchain.stream(opNames=['custom_json'], start = block_num,
                                max_batch_size = 50,
                                raw_ops=False, threading=False)
     for post in stream:
-        time_dif = post['timestamp'].replace(tzinfo=None) - start_time
-        if time_dif > timedelta(minutes=15):
-            logging.info(post['timestamp'])
+        post_time = post['timestamp'].replace(tzinfo=None)
+        time_dif = post_time - start_time
+        time_to_now = datetime.utcnow() - post_time
+        count_posts += 1
+        if time_dif > timedelta(minutes=5):
+            logging.info(str(post['timestamp']) + " Count: " + str(count_posts) + " Time Delta: " + str(time_to_now))
             start_time =post['timestamp'].replace(tzinfo=None)
+            count_posts = 0
+            if time_to_now < timedelta(minutes=5):
+                # Break out of the for loop we've caught up.
+                break
+
         if post['id'] == 'hive-hydra':
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
                 output(post)
-
+    logging.info('Finished catching up')
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes=60)
+    timed = timedelta(minutes=10)
     # timed = timedelta(days= 2)
     scan_history(timed)
     main()
