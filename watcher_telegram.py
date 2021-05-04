@@ -22,6 +22,12 @@ if USE_TEST_NODE:
 else:
     logging.info('---------------> Using Main Hive Chain ')
 
+if USE_TEST_NODE:
+    h = Hive(node=TEST_NODE)
+else:
+    h = Hive()
+
+
 def get_allowed_accounts(acc_name) -> bool:
     """ get a list of all accounts allowed to post by acc_name (podcastindex)
         and only react to these accounts """
@@ -45,15 +51,9 @@ def output(post) -> None:
     print('--------------------------------')
     print(json.dumps(data,indent=2,default=str))
     print('****************************************')
-    title = data.get('title')
-    url = data.get('url')
-    if not title:
-        title = "No Title"
-        url = "No URL"
-        t_message = json.dumps(data,indent=2,default=str)
-    else:
-        t_message = f"{title} updated ({url})"
 
+    data['required_posting_auths'] = post.get('required_posting_auths')
+    t_message = json.dumps(data,indent=2,default=str)
 
     bot.send_message(chat_id="-1001375564114",text=t_message)
 
@@ -62,18 +62,13 @@ def main():
     """ watches the stream from the Hive blockchain """
     allowed_accounts = get_allowed_accounts('podcastindex')
 
-    if USE_TEST_NODE:
-        h = Hive(node=TEST_NODE)
-    else:
-        h = Hive()
-
-    # If you want instant confirmation, you need to instantiate
-    # class:beem.blockchain.Blockchain with mode="head",
-    # otherwise, the call will wait until confirmed in an irreversible block.
     blockchain = Blockchain(mode="head")
     current_block_num = blockchain.get_current_block_num()
     logging.info('Watching live from block_num: ' + str(current_block_num))
 
+    # If you want instant confirmation, you need to instantiate
+    # class:beem.blockchain.Blockchain with mode="head",
+    # otherwise, the call will wait until confirmed in an irreversible block.
     stream = blockchain.stream(opNames=['custom_json'], raw_ops=False, threading=False, thread_num=4)
 
     start_time = datetime.utcnow()
@@ -96,11 +91,6 @@ def main():
 
 def scan_history(timed):
     allowed_accounts = get_allowed_accounts('podcastindex')
-
-    if USE_TEST_NODE:
-        h = Hive(node=TEST_NODE)
-    else:
-        h = Hive()
 
     blockchain = Blockchain(mode="head")
     start_time = datetime.utcnow() - timed
@@ -135,7 +125,7 @@ def scan_history(timed):
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes=60)
+    timed = timedelta(minutes=15)
     # timed = timedelta(days= 2)
     scan_history(timed)
     main()
