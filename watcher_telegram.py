@@ -1,4 +1,5 @@
 from beem import Hive
+from beem import account
 from beem.account import Account
 from beem.blockchain import Blockchain
 from datetime import datetime, time, timedelta, tzinfo, timezone
@@ -10,8 +11,9 @@ import telegram
 import os
 
 # Testnet instead of main Hive
-USE_TEST_NODE = True
+USE_TEST_NODE = False
 TEST_NODE = ['http://testnet.openhive.network:8091']
+TELEGRAM_CHAT_ID = "-1001375564114"
 
 t_key = os.getenv('TELEGRAM_BOT_KEY')
 
@@ -45,21 +47,33 @@ def get_allowed_accounts(acc_name) -> bool:
 
 def output(post) -> None:
     """ Prints out the post and extracts the custom_json """
-    bot = telegram.Bot(token=t_key)
     data = json.loads(post.get('json'))
-    print(json.dumps(post, indent=2, default=str))
-    print('--------------------------------')
-    print(json.dumps(data,indent=2,default=str))
-    print('****************************************')
-
     data['required_posting_auths'] = post.get('required_posting_auths')
-    t_message = json.dumps(data,indent=2,default=str)
+    logging.info(json.dumps(post, indent=2, default=str))
+    # print('--------------------------------')
+    logging.info(json.dumps(data,indent=2,default=str))
+    # print('****************************************')
+    telegram_post(data)
 
-    bot.send_message(chat_id="-1001375564114",text=t_message)
+def telegram_post(data) -> None:
+    """ Outputs to Telegram """
+    bot = telegram.Bot(token=t_key)
+    lines = []
+    for key, value in data.items():
+        if type(value) is list:
+            value = ' '.join(value)
+        text = f'<b>{key}</b> : {value}\n'
+        lines.append(text)
+    text = ''.join(lines)
+    bot.send_message(chat_id=TELEGRAM_CHAT_ID,
+                 text=text,
+                 parse_mode=telegram.ParseMode.HTML)
 
-
-def main():
+def main(report_freq = None):
     """ watches the stream from the Hive blockchain """
+
+    if not report_freq:
+        report_freq = timedelta(minutes=1)
     allowed_accounts = get_allowed_accounts('podcastindex')
 
     blockchain = Blockchain(mode="head")
@@ -89,7 +103,14 @@ def main():
 
 
 
-def scan_history(timed):
+def scan_history(timed= None, report_freq = None):
+    """ Scans back in history timed time delta ago, reporting with report_freq """
+    if not report_freq:
+        report_freq = timedelta(minutes=5)
+
+    if not timed:
+        timed = timedelta(hours=1)
+
     allowed_accounts = get_allowed_accounts('podcastindex')
 
     blockchain = Blockchain(mode="head")
@@ -106,7 +127,7 @@ def scan_history(timed):
         time_dif = post_time - start_time
         time_to_now = datetime.utcnow() - post_time
         count_posts += 1
-        if time_dif > timedelta(minutes=5):
+        if time_dif > report_freq:
             logging.info(str(post['timestamp']) + " Count: " + str(count_posts) + " Time Delta: " + str(time_to_now))
             start_time =post['timestamp'].replace(tzinfo=None)
             count_posts = 0
@@ -125,7 +146,8 @@ def scan_history(timed):
 
 
 if __name__ == "__main__":
-    timed = timedelta(minutes=15)
-    # timed = timedelta(days= 2)
-    scan_history(timed)
-    main()
+    # telegram_post({})
+    timed = timedelta(days=1)
+    report = timedelta(minutes=15)
+    scan_history(timed, report)
+    # main()
