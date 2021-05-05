@@ -179,7 +179,7 @@ threading.Thread(target=telegram_worker, daemon=True).start()
 if __name__ == "__main__":
     # telegram_post({})
 
-    timed = timedelta(minutes=15)
+    timed = timedelta(minutes=180)
     report = timedelta(minutes=15)
     scan_history(timed, report)
     main()
