@@ -13,7 +13,7 @@ import telegram
 import os
 
 # Testnet instead of main Hive
-USE_TEST_NODE = False
+USE_TEST_NODE = True
 TEST_NODE = ['http://testnet.openhive.network:8091']
 TELEGRAM_CHAT_ID = "-1001454810391"
 if USE_TEST_NODE:
