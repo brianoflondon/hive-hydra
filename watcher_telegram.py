@@ -14,6 +14,9 @@ import os
 
 # Testnet instead of main Hive
 USE_TEST_NODE = True
+TELEGRAM_ALERTS = True
+
+
 TEST_NODE = ['http://testnet.openhive.network:8091']
 TELEGRAM_CHAT_ID = "-1001454810391"
 if USE_TEST_NODE:
@@ -75,11 +78,13 @@ def telegram_post(data) -> None:
         text = f'<b>{key}</b> : {value}\n'
         lines.append(text)
     text = ''.join(lines)
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID,
-                 text=text,
-                 parse_mode=telegram.ParseMode.HTML)
-    sleep(10)
-
+    if TELEGRAM_ALERTS:
+        bot.send_message(chat_id=TELEGRAM_CHAT_ID,
+                    text=text,
+                    parse_mode=telegram.ParseMode.HTML)
+        sleep(10)
+    else:
+        logging.info('Telegram disabled')
 
 def main(report_freq = None):
     """ watches the stream from the Hive blockchain """
@@ -174,7 +179,7 @@ threading.Thread(target=telegram_worker, daemon=True).start()
 if __name__ == "__main__":
     # telegram_post({})
 
-    timed = timedelta(hours=1)
+    timed = timedelta(minutes=15)
     report = timedelta(minutes=15)
     scan_history(timed, report)
     main()
