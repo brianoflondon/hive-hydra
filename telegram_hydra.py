@@ -1,4 +1,5 @@
 from telegram.ext import Updater
+from telegram.chat import Chat
 import os
 import logging
 
@@ -24,4 +25,10 @@ import telegram
 
 # find chat_id : https://t.me/username_to_id_bot
 bot = telegram.Bot(token=t_key)
-bot.send_message(chat_id="-1001375564114",text="Hello World")
+
+chan = Chat(id="-1001454810391", type='channel')
+
+print('hello')
+# bot.send_message(chat_id="-1001375564114",text="Hello World")
+
+# https://web.telegram.org/#/im?p=@hive_hydra
