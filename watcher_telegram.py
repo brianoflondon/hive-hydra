@@ -13,7 +13,8 @@ import telegram
 import os
 
 # Testnet instead of main Hive
-USE_TEST_NODE = True
+
+USE_TEST_NODE = os.getenv("USE_TEST_NODE", 'False').lower() in ('true', '1', 't')
 TELEGRAM_ALERTS = True
 WATCHED_OPERATION_IDS = ['podping','hive-hydra']
 
