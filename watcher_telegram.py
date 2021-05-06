@@ -13,8 +13,9 @@ import telegram
 import os
 
 # Testnet instead of main Hive
-USE_TEST_NODE = False
+USE_TEST_NODE = True
 TELEGRAM_ALERTS = True
+WATCHED_OPERATION_IDS = ['podping','hive-hydra']
 
 
 TEST_NODE = ['http://testnet.openhive.network:8091']
@@ -57,6 +58,12 @@ def get_allowed_accounts(acc_name) -> bool:
 
     return allowed
 
+def allowed_op_id(operation_id):
+    """ Checks if the operation_id is in the allowed list """
+    if operation_id in WATCHED_OPERATION_IDS:
+        return True
+    else:
+        return False
 
 def output(post) -> None:
     """ Prints out the post and extracts the custom_json """
@@ -90,7 +97,7 @@ def telegram_post(data) -> None:
 
 def telegram_alive() -> None:
     """ Sends a message to telegram every 15 minutes """
-    text = __file__ + ' running at ' + str(datetime.now()) + ' Test: ' + USE_TEST_NODE
+    text = __file__ + ' running at ' + str(datetime.now()) + ' Test: ' + str(USE_TEST_NODE)
     bot = telegram.Bot(token=os.getenv('TELEGRAM_BOT_KEY'))
     bot.send_message(chat_id='-1001389993620',
                         text=text,
@@ -136,7 +143,7 @@ def main(report_freq = None):
             start_time =post['timestamp'].replace(tzinfo=None)
             count_posts = 0
 
-        if post['id'] == 'hive-hydra':
+        if allowed_op_id(post['id']):
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
                 output(post)
 
@@ -172,7 +179,7 @@ def scan_history(timed= None, report_freq = None):
             start_time =post['timestamp'].replace(tzinfo=None)
             count_posts = 0
 
-        if post['id'] == 'hive-hydra':
+        if allowed_op_id(post['id']):
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
                 output(post)
 
