@@ -61,6 +61,7 @@ def output(post) -> None:
     data = json.loads(post.get('json'))
     data['required_posting_auths'] = post.get('required_posting_auths')
     data['trx_id'] = post.get('trx_id')
+    data['timestamp'] = post.get('timestamp')
     if USE_TEST_NODE:
         data['test_node'] = True
     logging.info('Found alert: ' + data.get('url'))
@@ -179,7 +180,7 @@ threading.Thread(target=telegram_worker, daemon=True).start()
 if __name__ == "__main__":
     # telegram_post({})
 
-    timed = timedelta(minutes=180)
+    timed = timedelta(hours=1)
     report = timedelta(minutes=15)
     scan_history(timed, report)
     main()
