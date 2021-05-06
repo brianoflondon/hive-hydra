@@ -2,7 +2,7 @@ from beem import Hive
 from beem import account
 from beem.account import Account
 from beem.blockchain import Blockchain
-from datetime import datetime, time, timedelta, tzinfo, timezone
+from datetime import date, datetime, time, timedelta, tzinfo, timezone
 from time import sleep
 import json
 import logging
@@ -23,7 +23,9 @@ if USE_TEST_NODE:
     t_key = os.getenv('TELEGRAM_BOT_KEY_TEST')
 else:
     t_key = os.getenv('TELEGRAM_BOT_KEY')
+
 telegram_q = queue.Queue()
+telegram_alive_q = queue.Queue()
 
 logging.basicConfig(level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -85,6 +87,26 @@ def telegram_post(data) -> None:
         sleep(10)
     else:
         logging.info('Telegram disabled')
+
+def telegram_alive() -> None:
+    """ Sends a message to telegram every 15 minutes """
+    text = __file__ + ' running at ' + str(datetime.now())
+    bot = telegram.Bot(token=os.getenv('TELEGRAM_BOT_KEY'))
+    bot.send_message(chat_id='-1001389993620',
+                        text=text,
+                        parse_mode=telegram.ParseMode.HTML)
+    logging.info("I'm alive notification sent")
+    sleep(15*60)
+    telegram_alive_q.put( (telegram_alive, ) )
+
+def telegram_alive_worker():
+    """ Infinite run the Telegram alive code """
+    telegram_alive_q.put( (telegram_alive, ) )
+    while True:
+        items = telegram_alive_q.get()
+        func = items[0]
+        func()
+
 
 def main(report_freq = None):
     """ watches the stream from the Hive blockchain """
@@ -174,7 +196,9 @@ def telegram_worker():
         logging.info(f'Finished sending to telegram. Q size : '+ str(telegram_q.qsize()))
 
 
+
 threading.Thread(target=telegram_worker, daemon=True).start()
+threading.Thread(target=telegram_alive_worker, daemon=True).start()
 
 if __name__ == "__main__":
     # telegram_post({})
