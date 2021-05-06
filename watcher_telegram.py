@@ -90,7 +90,7 @@ def telegram_post(data) -> None:
 
 def telegram_alive() -> None:
     """ Sends a message to telegram every 15 minutes """
-    text = __file__ + ' running at ' + str(datetime.now()) + ' Test: ' + USE_TEST_NODE
+    text = __file__ + ' running at ' + str(datetime.now()) + ' Test: ' + str(USE_TEST_NODE)
     bot = telegram.Bot(token=os.getenv('TELEGRAM_BOT_KEY'))
     bot.send_message(chat_id='-1001389993620',
                         text=text,
