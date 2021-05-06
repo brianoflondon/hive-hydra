@@ -66,7 +66,6 @@ def output(post) -> None:
         data['test_node'] = True
     logging.info('Found alert: ' + data.get('url'))
     telegram_q.put( (telegram_post, data) )
-    logging.info('Q size : ' + str(telegram_q.qsize()))
 
 def telegram_post(data) -> None:
     """ Outputs to Telegram """
