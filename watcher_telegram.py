@@ -1,26 +1,24 @@
-from beem import Hive
-from beem import account
-from beem.account import Account
-from beem.blockchain import Blockchain
-from datetime import date, datetime, time, timedelta, tzinfo, timezone
-from time import sleep
 import json
 import logging
-
-import queue, threading
+import os
+import queue
+import threading
+from datetime import datetime, timedelta
+from time import sleep
 
 import telegram
-import os
+from beem import Hive
+from beem.account import Account
+from beem.blockchain import Blockchain
 
 # Testnet instead of main Hive
 
 USE_TEST_NODE = os.getenv("USE_TEST_NODE", 'False').lower() in ('true', '1', 't')
-TELEGRAM_ALERTS = True
+TELEGRAM_ALERTS = os.getenv("TELEGRAM_ALERTS", 'False').lower() in ('true', '1', 't')
 WATCHED_OPERATION_IDS = ['podping','hive-hydra']
-
-
 TEST_NODE = ['http://testnet.openhive.network:8091']
-TELEGRAM_CHAT_ID = "-1001454810391"
+TELEGRAM_CHAT_ID = "-1001454810391"     # Hive Hydra Podcasting 2.0 Channel on Telegram
+
 if USE_TEST_NODE:
     t_key = os.getenv('TELEGRAM_BOT_KEY_TEST')
 else:
@@ -37,9 +35,9 @@ else:
     logging.info('---------------> Using Main Hive Chain ')
 
 if USE_TEST_NODE:
-    h = Hive(node=TEST_NODE)
+    hive = Hive(node=TEST_NODE)
 else:
-    h = Hive()
+    hive = Hive()
 
 
 def get_allowed_accounts(acc_name) -> bool:
@@ -49,7 +47,7 @@ def get_allowed_accounts(acc_name) -> bool:
     if USE_TEST_NODE:
         return ['learn-to-code','hive-hydra','hivehydra','flyingboy']
 
-    hiveaccount = Account(acc_name, lazy=True)
+    hiveaccount = Account(acc_name, blockchain_instance=hive, lazy=True)
     try:
         allowed = hiveaccount['posting']['account_auths']
         allowed = [x for (x,_) in allowed]
@@ -116,14 +114,28 @@ def telegram_alive_worker():
         func()
 
 
-def main(report_freq = None):
+def telegram_worker():
+    while True:
+        logging.info(f'Telegram send Q operating. Q size : '+ str(telegram_q.qsize()))
+        items = telegram_q.get()
+        func = items[0]
+        args = items[1:]
+        func(*args)
+        telegram_q.task_done()
+        logging.info(f'Finished sending to telegram. Q size : '+ str(telegram_q.qsize()))
+
+
+def scan_live(report_freq = None):
     """ watches the stream from the Hive blockchain """
 
     if not report_freq:
         report_freq = timedelta(minutes=1)
+
+    if type(report_freq) == int:
+        report_freq = timedelta(minutes=report_freq)
     allowed_accounts = get_allowed_accounts('podcastindex')
 
-    blockchain = Blockchain(mode="head", blockchain_instance=h)
+    blockchain = Blockchain(mode="head", blockchain_instance=hive)
     current_block_num = blockchain.get_current_block_num()
     logging.info('Watching live from block_num: ' + str(current_block_num))
 
@@ -138,7 +150,7 @@ def main(report_freq = None):
     for post in stream:
         count_posts +=1
         time_dif = post['timestamp'].replace(tzinfo=None) - start_time
-        if time_dif > timedelta(minutes=1):
+        if time_dif > report_freq:
             current_block_num = blockchain.get_current_block_num()
             logging.info(str(post['timestamp']) + " Count: " + str(count_posts) + " block_num: " + str(current_block_num))
             start_time =post['timestamp'].replace(tzinfo=None)
@@ -148,20 +160,30 @@ def main(report_freq = None):
             if  (set(post['required_posting_auths']) & set(allowed_accounts)):
                 output(post)
 
-
+        if time_dif > timedelta(hours=1):
+            # Refetch the allowed_accounts every hour in case we add one.
+            allowed_accounts = get_allowed_accounts('podcastindex')
 
 def scan_history(timed= None, report_freq = None):
-    """ Scans back in history timed time delta ago, reporting with report_freq """
+    """ Scans back in history timed time delta ago, reporting with report_freq
+        if timed is an int, treat it as hours, if report_freq is int, treat as min """
     scan_start_time = datetime.utcnow()
+
     if not report_freq:
         report_freq = timedelta(minutes=5)
 
     if not timed:
         timed = timedelta(hours=1)
 
+    if type(timed) == int:
+        timed = timedelta(hours=timed)
+
+    if type(report_freq) == int:
+        report_freq = timedelta(minutes=report_freq)
+
     allowed_accounts = get_allowed_accounts('podcastindex')
 
-    blockchain = Blockchain(mode="head", blockchain_instance=h)
+    blockchain = Blockchain(mode="head", blockchain_instance=hive)
     start_time = datetime.utcnow() - timed
     count_posts = 0
     block_num = blockchain.get_estimated_block_num(start_time)
@@ -193,25 +215,15 @@ def scan_history(timed= None, report_freq = None):
     logging.info('Finished catching up at block_num: ' + str(post['block_num']) + ' in '+ str(scan_time))
 
 
-def telegram_worker():
-    while True:
-        logging.info(f'Working on sending to telegram. Q size : '+ str(telegram_q.qsize()))
-        items = telegram_q.get()
-        func = items[0]
-        args = items[1:]
-        func(*args)
-        telegram_q.task_done()
-        logging.info(f'Finished sending to telegram. Q size : '+ str(telegram_q.qsize()))
-
-
-
 threading.Thread(target=telegram_worker, daemon=True).start()
 threading.Thread(target=telegram_alive_worker, daemon=True).start()
 
-if __name__ == "__main__":
-    # telegram_post({})
+def main() -> None:
+    """ Main file """
+    scan_history(1, 15)
+    scan_live(2)
 
-    timed = timedelta(hours=1)
-    report = timedelta(minutes=15)
-    scan_history(timed, report)
+
+
+if __name__ == "__main__":
     main()
