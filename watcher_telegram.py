@@ -19,25 +19,25 @@ WATCHED_OPERATION_IDS = ['podping','hive-hydra']
 TEST_NODE = ['http://testnet.openhive.network:8091']
 TELEGRAM_CHAT_ID = "-1001454810391"     # Hive Hydra Podcasting 2.0 Channel on Telegram
 
-if USE_TEST_NODE:
-    t_key = os.getenv('TELEGRAM_BOT_KEY_TEST')
-else:
-    t_key = os.getenv('TELEGRAM_BOT_KEY')
-
-telegram_q = queue.Queue()
-telegram_alive_q = queue.Queue()
 
 logging.basicConfig(level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
-if USE_TEST_NODE:
-    logging.info('---------------> Using Test Node ' + TEST_NODE[0])
-else:
-    logging.info('---------------> Using Main Hive Chain ')
+
 
 if USE_TEST_NODE:
+    t_key = os.getenv('TELEGRAM_BOT_KEY_TEST')
+    logging.info('---------------> Using Test Node ' + TEST_NODE[0])
     hive = Hive(node=TEST_NODE)
+
 else:
+    t_key = os.getenv('TELEGRAM_BOT_KEY')
+    logging.info('---------------> Using Main Hive Chain ')
     hive = Hive()
+
+if TELEGRAM_ALERTS:
+    telegram_q = queue.Queue()
+    telegram_alive_q = queue.Queue()
+
 
 
 def get_allowed_accounts(acc_name) -> bool:
@@ -45,7 +45,7 @@ def get_allowed_accounts(acc_name) -> bool:
         and only react to these accounts """
 
     if USE_TEST_NODE:
-        return ['learn-to-code','hive-hydra','hivehydra','flyingboy']
+        return ['learn-to-code','hive-hydra','hivehydra','flyingboy','blocktvnews']
 
     hiveaccount = Account(acc_name, blockchain_instance=hive, lazy=True)
     try:
@@ -73,26 +73,28 @@ def output(post) -> None:
     if USE_TEST_NODE:
         data['test_node'] = True
     logging.info('Found alert: ' + data.get('url'))
-    telegram_q.put( (telegram_post, data) )
+    if TELEGRAM_ALERTS:
+        telegram_q.put( (telegram_post, data) )
 
 def telegram_post(data) -> None:
     """ Outputs to Telegram """
-    logging.info('Sending to telegram')
-    bot = telegram.Bot(token=t_key)
-    lines = []
-    for key, value in data.items():
-        if type(value) is list:
-            value = ' '.join(value)
-        text = f'<b>{key}</b> : {value}\n'
-        lines.append(text)
-    text = ''.join(lines)
     if TELEGRAM_ALERTS:
+        logging.info('Sending to telegram')
+        bot = telegram.Bot(token=t_key)
+        lines = []
+        for key, value in data.items():
+            if type(value) is list:
+                value = ' '.join(value)
+            text = f'<b>{key}</b> : {value}\n'
+            lines.append(text)
+        text = ''.join(lines)
+
         bot.send_message(chat_id=TELEGRAM_CHAT_ID,
                     text=text,
                     parse_mode=telegram.ParseMode.HTML)
         sleep(10)
-    else:
-        logging.info('Telegram disabled')
+
+
 
 def telegram_alive() -> None:
     """ Sends a message to telegram every 15 minutes """
@@ -214,9 +216,9 @@ def scan_history(timed= None, report_freq = None):
     scan_time = datetime.utcnow() - scan_start_time
     logging.info('Finished catching up at block_num: ' + str(post['block_num']) + ' in '+ str(scan_time))
 
-
-threading.Thread(target=telegram_worker, daemon=True).start()
-threading.Thread(target=telegram_alive_worker, daemon=True).start()
+if TELEGRAM_ALERTS:
+    threading.Thread(target=telegram_worker, daemon=True).start()
+    threading.Thread(target=telegram_alive_worker, daemon=True).start()
 
 def main() -> None:
     """ Main file """
